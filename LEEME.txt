@@ -1,0 +1,42 @@
+INVITACIÓN E&L — CÓMO DEJARLA LISTA
+====================================
+
+1. MÚSICA
+   Copia la canción en la carpeta "musica" con el nombre exacto: cancion.mp3
+
+2. DATOS DE LOS NOVIOS
+   Abre index.html y busca "const CONFIG". Ahí se cambian nombres, fecha,
+   lugares, programa, fotos y el WhatsApp que recibe las confirmaciones.
+
+3. LIBRO DE BUENOS DESEOS
+   Sin configurar nada funciona en "modo demostración": los deseos se guardan
+   solo en el teléfono de quien los escribe, así que los novios NO los verían.
+
+   Para que todos los deseos se guarden en un solo lugar y los novios los lean:
+   a) En Firebase (consola.firebase.google.com) crea o usa un proyecto y
+      activa Firestore Database.
+   b) En Configuración del proyecto > Tus apps > App web, copia el objeto
+      firebaseConfig y pégalo en CONFIG, en la línea "firebase: null", así:
+        firebase: { apiKey:'...', authDomain:'...', projectId:'...', appId:'...' },
+   c) Cambia "coleccionDeseos" por un nombre único para cada boda
+      (por ejemplo 'deseos_emilia_leonardo').
+   d) En Firestore > Reglas, permite leer y solo agregar deseos (no editar ni
+      borrar) con estas reglas:
+
+      rules_version = '2';
+      service cloud.firestore {
+        match /databases/{database}/documents {
+          match /{coleccion}/{id} {
+            allow read: if coleccion.matches('deseos_.*');
+            allow create: if coleccion.matches('deseos_.*')
+              && request.resource.data.keys().hasOnly(['nombre','mensaje','origen','fecha'])
+              && request.resource.data.nombre is string && request.resource.data.nombre.size() <= 60
+              && request.resource.data.mensaje is string && request.resource.data.mensaje.size() <= 500
+              && request.resource.data.fecha == request.time;
+            allow update, delete: if false;
+          }
+        }
+      }
+
+   Los mensajes que alguien escribe al confirmar también se guardan en el libro
+   (si deja marcada la casilla "Escribir también mis palabras en el libro").
