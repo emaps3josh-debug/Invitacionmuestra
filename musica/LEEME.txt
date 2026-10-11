@@ -1,0 +1,2 @@
+Coloca aqui tu cancion con el nombre exacto: cancion.mp3
+(La invitacion la reproduce automaticamente al abrir el sobre.)
